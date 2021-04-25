@@ -1,55 +1,51 @@
-import './App.css';
-import PropTypes from 'prop-types';
+import React from 'react';
+import axios from 'axios';
+import Movie from './Movie';
 
-function Print({name, image, rating}) {
-  return (
-    <div>
-      <h3>{name}</h3>
-      <img src={image} />
-      <h4>{rating}</h4>
-    </div>
-  );
-}
+class App extends React.Component {
+  state = {
+    isLoading: true,
+    movies: [],
+  };
 
-Print.propTypes = {
-  name: PropTypes.string.isRequired,
-  image: PropTypes.string.isRequired,
-  rating: PropTypes.number.isRequired,
-};
+  getMovies = async () => {
+    const {
+      data: {
+        data: { movies },
+      },
+    } = await axios.get(
+      'https://yts-proxy.now.sh/list_movies.json?sort_by=rating',
+    );
+    this.setState({ movies, isLoading: false });
+  };
 
-const favList = [
-  {
-    id:1,
-    name:"fromis9",
-    image:"https://storage3.ilyo.co.kr/contents/article/images/2020/0917/1600316908454180.jpg",
-    rating:4.9
-  },
-  {
-    id:2,
-    name:"bravegirls",
-    image:"https://img.sportsworldi.com/content/image/2021/03/20/20210320505771.jpg",
-    rating:5.0
-  },
-  {
-    id:3,
-    name:"rollin",
-    image:"https://image.ytn.co.kr/general/jpg/2021/0304/202103041352125044_d.jpg",
-    rating:5.0
+  componentDidMount() {
+    this.getMovies();
   }
-];
-
-function rendorFav(fav) {
-  return <Print name={fav.name} image={fav.image} rating={fav.rating}/>;
+  render() {
+    const { isLoading, movies } = this.state;
+    return (
+      <section class="container">
+        {isLoading ? (
+          <div class="loader">
+            <span class="loader__text">Loading...</span>
+          </div>
+        ) : (
+          <div class="movie">
+            {movies.map((movie) => (
+              <Movie
+                key={movie.id}
+                year={movie.year}
+                title={movie.title}
+                summary={movie.summary}
+                poster={movie.medium_cover_image}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+    );
+  }
 }
-
-function App() {
-  return (
-    <div>
-      <h1>Hello</h1>
-      {favList.map(rendorFav)}
-    </div>
-  );
-}
-
 
 export default App;
